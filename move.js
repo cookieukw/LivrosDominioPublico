@@ -2,7 +2,7 @@
 
 const fs= require("fs")
 const pdf = "./livros/"
-const frame = "./books/"
+const frame = "./literature/"
 const list = fs.readdirSync(pdf)
 let size = 200
 let skip = 0

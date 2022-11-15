@@ -1,15 +1,14 @@
-//Gera um json mas ele é bagunçado porcausa da forma que o site foi feito(impede uma boa extração)
-
+//Gera um json mas ele é bagunçado porcausa da forma que o site foi feito(impede uma boa extração)`
 
 const axios = require("axios")
 const cheerio = require("cheerio")
 let url = "http://www.dominiopublico.gov.br/pesquisa/ResultadoPesquisaObraForm.do?first="
-const url2= "&ds_titulo=&co_autor=&no_autor=&co_categoria=&pagina=1&select_action=Submit&co_midia=2&co_obra=&co_idioma=1&colunaOrdenar=null&ordem=null"
-let skip = 0
+const url2= "&ds_titulo=&co_autor=&no_autor=&co_categoria=2&pagina=3&select_action=Submit&co_midia=2&co_obra=&co_idioma=1&colunaOrdenar=null&ordem=null"
 const { v4 } = require('uuid'); 
 const path = "pdf/"
 let download = "http://www.dominiopublico.gov.br/download"
-let page = 1000
+let page = 2080
+let skip = 0
 let search_url = "http://www.dominiopublico.gov.br"
 const log = l => console.log(l)
 let url_data = []
@@ -19,14 +18,14 @@ const fs = require("fs")
 const clear = text => {
   return text
   .trim()
-  .replace(/-/g,"")
+ // .replace(/-/g,"")
   .replace(":","")
   .replace("/"," ")
   //.replace("\\"," ")
   .toLowerCase()
   .replaceAll(/"/g, '\\"')
-  .replaceAll(/\(.*\)/g, '')
-  .replaceAll(/\[.*\]/g, '')
+  //.replaceAll(/\(.*\)/g, '')
+ // .replaceAll(/\[.*\]/g, '')
   .replace("[cp","")
   .replace("(cp","")
   .replace("[", '')
@@ -48,14 +47,27 @@ const loadURL = async () =>{
     
     let table = $("#res").find("tbody")
     
-    table.find("tr.odd").each((i, elem) =>url_data.push($(elem).find("a[style='cursor:hand']").last().attr("href")))
+    table.find("tr.odd").each((i, elem) =>{
+      url_data.push({
+       url: $(elem).find("a[style='cursor:hand']").last().attr("href"),
+      size: clear($(elem).find("td[align='right']").first().text())
+      })
+})
+
     
-    table.find("tr.even").each((i, elem) =>url_data.push($(elem).find("a[style='cursor:hand']").last().attr("href")))
+      table.find("tr.even").each((i, elem) =>{
+      url_data.push({
+       url: $(elem).find("a[style='cursor:hand']").last().text(),
+      size: clear($(elem).find("td[align='right']").first().text())
+      })
+    })
+    
+    
     
     getData()
     
-  })
-  .catch(err=>log(err.message))
+
+  }).catch(err=>log(err.message))
 }
 
 
@@ -63,7 +75,7 @@ const getData = async () => {
   index++
   for(let pos in url_data){
     log(`${pos} de ${url_data.length-1}`)
-    await axios.get(search_url+(url_data[pos].substring(2)))
+    await axios.get(search_url+(url_data[pos].url.substring(2)))
     .then(data =>{
       let $ = cheerio.load(data.data)
       
@@ -85,20 +97,19 @@ const getData = async () => {
         
         if(!tag || !value) return
         
-        temp = temp+`\n"${tag}":"${value}",`
+        temp = temp+`\n"${tag}":"${value}",\n`
       })
+      temp = temp+`"size":"${url_data[pos].size}",\n`
       temp = temp+`\n"url":"${download}${temp_url}",\n"id":"${id}"`
       
       temp = JSON.parse("{"+temp+"\n}")
-      //log({temp})
-      // log({jsom:JSON.parse(`\{${temp}\}`)})
-      fs.appendFile("./json/info.json", JSON.stringify(temp)+",\n", ()=>{
+
+      fs.appendFile("./json/literatura.json", JSON.stringify(temp)+",\n", ()=>{
         log("Append sucess!")
       })
       
       
     }).catch(err=>log(err.message))
-    //break
   }
   
   

@@ -4,21 +4,23 @@
 const fs = require("fs")
 const path = "./json/"
 
-const data = JSON.parse(fs.readFileSync(path+"info.json","utf8"))
+const data = JSON.parse(fs.readFileSync(path+"literatura.json","utf8"))
 const newData = []
-data.slice(0, data.length-3).forEach(obj=>{
+data.forEach(obj=>{
 let o = {
   authors: obj.autor,
   categories: obj.categoria,
-  date: obj["ano da tese"],
-  img: "",
+  date: obj["ano da tese"] || "?",
+  img: "?",
+  size:obj.size,
+  language: obj.idioma,
   description: obj.resumo,
   title: obj["título"],
   uid: obj.id,
   pageCount: 0,
-  original_url: obj.url,
+  download_url: obj.url,
 }
 newData.push(o)
 })
 
-fs.writeFileSync(path+"newInfo.json",JSON.stringify(newData))
+fs.writeFileSync(path+"newLiteratura.json",JSON.stringify(newData))

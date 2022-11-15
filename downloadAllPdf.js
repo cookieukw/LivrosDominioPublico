@@ -2,10 +2,10 @@
 const l = l => console.log(l)
 const fs = require("fs")
 const http = require('http');
-const books = JSON.parse(fs.readFileSync("./json/newInfo.json","utf8"))
+const books = JSON.parse(fs.readFileSync("./json/literatura_format.json","utf8"))
 const path = "./books/"
-const size = books.length
-const skip = 950
+const size = 40
+const skip = 1000
 const options = { 
   headers: { 
     'User-Agent': 'Mozilla/5.0 (Linux; Android 11; SM-A107M Build/RP1A.200720.012) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/107.0.5304.91 Mobile Safari/537.36', 
@@ -34,18 +34,13 @@ let downloadPdf = (link, dest)=> {
     l({err,link})
   })
 };
-/*page = 20
-skip = 10
-total = 150
-total - skip = 140
-total - skip - page = 120
-*/
+
 (async ()=>{
 books.slice(skip, skip+size).forEach((book, index)=>{
   l(book)
   let file = book.uid+".pdf"
   l(`${index} de ${books.length-1}`)
   
-  downloadPdf(book.original_url, `${path}${file}`)
+  downloadPdf(book.download_url, `${path}${file}`)
 })
 })()
